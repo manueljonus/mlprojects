@@ -1,9 +1,7 @@
 pandas
 numpy
-seaborn
-matplotlib
 scikit-learn
-xgboost
+xgboost-cpu
 catboost
 dill
 flask
