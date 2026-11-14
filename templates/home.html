@@ -1,111 +1,558 @@
-<html>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Enter student details to estimate mathematics performance.">
+
+    <title>Student Predictor | Student Insight</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
 <body>
-    <div class="login">
-       <h1>Student Exam Performance Indicator</h1>
-   
-       <form action="{{ url_for('predict_datapoint')}}" method="post">
-        <h1>
-            <legend>Student Exam Performance Prediction</legend>
-        </h1>
-        <div class="mb-3">
-            <label class="form-label">Gender</label>
-            <select class="form-control" name="gender" placeholder="Enter you Gender" required>
-                <option class="placeholder" selected disabled value="">Select your Gender</option>
-                <option value="male">
-                    Male
-                </option>
-                <option value="female">
-                    Female
-                </option>
-            </select>
+
+<div class="site-shell">
+
+    <!-- HEADER -->
+    <header class="topbar">
+
+        <a class="brand" href="{{ url_for('index') }}">
+            <span class="brand-mark">S<span>.</span></span>
+            <span class="brand-name">student<span>insight</span></span>
+        </a>
+
+        <nav class="nav-links" aria-label="Main navigation">
+            <a href="{{ url_for('index') }}">Overview</a>
+            <a class="active" href="{{ url_for('predict_datapoint') }}">Predictor</a>
+        </nav>
+
+        <a class="button button-small button-outline" href="{{ url_for('index') }}">
+            ← Back home
+        </a>
+
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="predict-page">
+
+        <div class="page-heading">
+
+            <div class="eyebrow">
+                <span class="eyebrow-dot"></span>
+                STUDENT PERFORMANCE INDICATOR
+            </div>
+
+            <h1>
+                Let's understand the
+                <br>
+                <span class="gradient-text">student's potential.</span>
+            </h1>
+
+            <p>
+                Complete the details below. The model will use the information
+                to estimate the mathematics score.
+            </p>
+
         </div>
-        <div class="mb-3">
-            <label class="form-label">Race or Ethnicity</label>
-            <select class="form-control" name="ethnicity" placeholder="Enter you ethnicity" required>
-                <option class="placeholder" selected disabled value="">Select Ethnicity</option>
-                <option value="group A">
-                    Group A
-                </option>
-                <option value="group B">
-                    Group B
-                </option>
-                <option value="group C">
-                    Group C
-                </option>
-                <option value="group D">
-                    Group D
-                </option>
-                <option value="group E">
-                    Group E
-                </option>
-            </select>
+
+
+        <div class="predict-layout">
+
+
+            <!-- FORM SECTION -->
+            <section class="form-card">
+
+                <div class="form-card-heading">
+
+                    <div>
+                        <span class="section-kicker">STUDENT INFORMATION</span>
+                        <h2>Prediction details</h2>
+                        <p>All fields are required to generate a prediction.</p>
+                    </div>
+
+                    <span class="step-badge">01 <i>/</i> 01</span>
+
+                </div>
+
+
+                <!-- ERROR MESSAGE -->
+                {% if error_message is defined and error_message %}
+
+                <div class="alert alert-error" role="alert">
+                    <strong>Unable to generate prediction</strong>
+                    <span>{{ error_message }}</span>
+                </div>
+
+                {% endif %}
+
+
+                <!-- PREDICTION FORM -->
+                <form action="{{ url_for('predict_datapoint') }}"
+                      method="POST"
+                      class="prediction-form">
+
+
+                    <!-- STUDENT BACKGROUND -->
+                    <div class="form-section-title">
+
+                        <span>01</span>
+
+                        <div>
+                            <h3>Student background</h3>
+                            <p>Tell us a little about the student.</p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid">
+
+
+                        <!-- GENDER -->
+                        <div class="field">
+
+                            <label for="gender">Gender</label>
+
+                            <select id="gender" name="gender" required>
+
+                                <option value="" disabled
+                                    {% if not submitted or not submitted.get('gender') %}selected{% endif %}>
+                                    Select gender
+                                </option>
+
+                                <option value="male"
+                                    {% if submitted and submitted.get('gender') == 'male' %}selected{% endif %}>
+                                    Male
+                                </option>
+
+                                <option value="female"
+                                    {% if submitted and submitted.get('gender') == 'female' %}selected{% endif %}>
+                                    Female
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- ETHNICITY -->
+                        <div class="field">
+
+                            <label for="ethnicity">Race or ethnicity</label>
+
+                            <select id="ethnicity" name="ethnicity" required>
+
+                                <option value="" disabled
+                                    {% if not submitted or not submitted.get('ethnicity') %}selected{% endif %}>
+                                    Select group
+                                </option>
+
+                                {% for group in ['group A', 'group B', 'group C', 'group D', 'group E'] %}
+
+                                <option value="{{ group }}"
+                                    {% if submitted and submitted.get('ethnicity') == group %}selected{% endif %}>
+                                    {{ group|title }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- PARENTAL EDUCATION -->
+                        <div class="field field-full">
+
+                            <label for="parental_level_of_education">
+                                Parental level of education
+                            </label>
+
+                            <select
+                                id="parental_level_of_education"
+                                name="parental_level_of_education"
+                                required>
+
+                                <option value="" disabled
+                                    {% if not submitted or not submitted.get('parental_level_of_education') %}selected{% endif %}>
+                                    Select education level
+                                </option>
+
+                                {% for level in [
+                                    "associate's degree",
+                                    "bachelor's degree",
+                                    "high school",
+                                    "master's degree",
+                                    "some college",
+                                    "some high school"
+                                ] %}
+
+                                <option value="{{ level }}"
+                                    {% if submitted and submitted.get('parental_level_of_education') == level %}selected{% endif %}>
+                                    {{ level|title }}
+                                </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- LUNCH -->
+                        <div class="field">
+
+                            <label for="lunch">Lunch type</label>
+
+                            <select id="lunch" name="lunch" required>
+
+                                <option value="" disabled
+                                    {% if not submitted or not submitted.get('lunch') %}selected{% endif %}>
+                                    Select lunch type
+                                </option>
+
+                                <option value="standard"
+                                    {% if submitted and submitted.get('lunch') == 'standard' %}selected{% endif %}>
+                                    Standard
+                                </option>
+
+                                <option value="free/reduced"
+                                    {% if submitted and submitted.get('lunch') == 'free/reduced' %}selected{% endif %}>
+                                    Free / reduced
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- TEST PREPARATION -->
+                        <div class="field">
+
+                            <label for="test_preparation_course">
+                                Test preparation
+                            </label>
+
+                            <select
+                                id="test_preparation_course"
+                                name="test_preparation_course"
+                                required>
+
+                                <option value="" disabled
+                                    {% if not submitted or not submitted.get('test_preparation_course') %}selected{% endif %}>
+                                    Select status
+                                </option>
+
+                                <option value="none"
+                                    {% if submitted and submitted.get('test_preparation_course') == 'none' %}selected{% endif %}>
+                                    None
+                                </option>
+
+                                <option value="completed"
+                                    {% if submitted and submitted.get('test_preparation_course') == 'completed' %}selected{% endif %}>
+                                    Completed
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-divider"></div>
+
+
+                    <!-- SUBJECT SCORES -->
+                    <div class="form-section-title">
+
+                        <span>02</span>
+
+                        <div>
+                            <h3>Subject scores</h3>
+                            <p>Enter the student's existing scores, from 0 to 100.</p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-grid score-grid">
+
+
+                        <!-- READING SCORE -->
+                        <div class="field">
+
+                            <label for="reading_score">
+                                Reading score
+                                <span class="label-unit">/ 100</span>
+                            </label>
+
+                            <input
+                                id="reading_score"
+                                name="reading_score"
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="1"
+                                placeholder="e.g. 78"
+                                value="{{ submitted.get('reading_score', '') if submitted else '' }}"
+                                required>
+
+                        </div>
+
+
+                        <!-- WRITING SCORE -->
+                        <div class="field">
+
+                            <label for="writing_score">
+                                Writing score
+                                <span class="label-unit">/ 100</span>
+                            </label>
+
+                            <input
+                                id="writing_score"
+                                name="writing_score"
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="1"
+                                placeholder="e.g. 85"
+                                value="{{ submitted.get('writing_score', '') if submitted else '' }}"
+                                required>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SUBMIT BUTTON -->
+                    <div class="form-actions">
+
+                        <button type="submit" class="button button-primary submit-button">
+                            Predict mathematics score
+                            <span aria-hidden="true">→</span>
+                        </button>
+
+                        <span class="privacy-note">
+                            <span>◆</span>
+                            Your inputs are used for this prediction.
+                        </span>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+
+
+            <!-- RESULT SECTION -->
+            <aside class="result-column">
+
+                <div class="result-card
+                    {% if results is defined and results is not none %}result-ready{% endif %}">
+
+
+                    <div class="result-card-top">
+
+                        <span class="result-icon">✦</span>
+
+                        <span class="result-status">
+
+                            {% if results is defined and results is not none %}
+                                PREDICTION COMPLETE
+                            {% else %}
+                                YOUR RESULT
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <span class="result-label">
+                        Predicted mathematics score
+                    </span>
+
+
+                    {% if results is defined and results is not none %}
+
+                        {% set score = [[results|float, 0]|max, 100]|min %}
+
+                        <!-- GAUGE GRAPH -->
+                        <div class="gauge-container">
+
+                            <svg viewBox="0 0 320 190"
+                                 role="img"
+                                 aria-label="Predicted mathematics score">
+
+                                <!-- Background arc -->
+                                <path
+                                    class="gauge-track"
+                                    d="M 45 155 A 115 115 0 0 1 275 155"
+                                />
+
+                                <!-- Prediction arc -->
+                                <path
+                                    class="gauge-progress"
+                                    d="M 45 155 A 115 115 0 0 1 275 155"
+                                    pathLength="100"
+                                    stroke-dasharray="{{ score }} 100"
+                                />
+
+                                <!-- Score -->
+                                <text
+                                    x="160"
+                                    y="119"
+                                    text-anchor="middle"
+                                    class="gauge-value">
+                                    {{ "%.2f"|format(results|float) }}
+                                </text>
+
+                                <!-- Label -->
+                                <text
+                                    x="160"
+                                    y="143"
+                                    text-anchor="middle"
+                                    class="gauge-label">
+                                    Predicted score
+                                </text>
+
+                                <!-- Minimum -->
+                                <text
+                                    x="45"
+                                    y="180"
+                                    text-anchor="middle"
+                                    class="gauge-min">
+                                    0
+                                </text>
+
+                                <!-- Maximum -->
+                                <text
+                                    x="275"
+                                    y="180"
+                                    text-anchor="middle"
+                                    class="gauge-max">
+                                    100
+                                </text>
+
+                            </svg>
+
+                        </div>
+
+
+                        <p class="result-message">
+                            Your model has generated an estimated mathematics score
+                            using the information submitted.
+                        </p>
+
+
+                    {% else %}
+
+
+                        <!-- INITIAL RESULT -->
+                        <div class="result-placeholder">
+                            --<span>/100</span>
+                        </div>
+
+                        <div class="result-meter">
+                            <i style="width: 0%"></i>
+                        </div>
+
+                        <p class="result-message">
+                            Your prediction will appear here after you complete
+                            the form.
+                        </p>
+
+
+                    {% endif %}
+
+
+                    <div class="result-divider"></div>
+
+
+                    <div class="result-meta">
+                        <span>Model status</span>
+                        <strong><i></i> Ready for input</strong>
+                    </div>
+
+                    <div class="result-meta">
+                        <span>Prediction type</span>
+                        <strong>Regression estimate</strong>
+                    </div>
+
+
+                </div>
+
+
+                <!-- INFORMATION -->
+                <div class="side-note">
+
+                    <span class="side-note-icon">ⓘ</span>
+
+                    <div>
+
+                        <strong>About this prediction</strong>
+
+                        <p>
+                            This tool provides a machine-learning estimate for
+                            learning and demonstration purposes. It should not
+                            be treated as a guaranteed result or a formal assessment.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <a class="back-link" href="{{ url_for('index') }}">
+                    ← Back to project overview
+                </a>
+
+
+            </aside>
+
         </div>
-        <div class="mb-3">
-            <label class="form-label">Parental Level of Education</label>
-            <select class="form-control" name="parental_level_of_education"
-                placeholder="Enter you Parent Education" required>
-                <option class="placeholder" selected disabled value="">Select Parent Education</option>
-                <option value="associate's degree">
-                    associate's degree
-                </option>
-                <option value="bachelor's degree">
-                    bachelor's degree
-                </option>
-                <option value="high school">
-                    high school
-                </option>
-                <option value="master's degree">
-                    master's degree
-                </option>
-                <option value="some college">
-                    some college
-                </option>
-                <option value="some high school">
-                    some high school
-                </option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Lunch Type</label>
-            <select class="form-control" name="lunch" placeholder="Enter you Lunch" required>
-                <option class="placeholder" selected disabled value="">Select Lunch Type</option>
-                <option value="free/reduced">
-                    free/reduced
-                </option>
-                <option value="standard">
-                    standard
-                </option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Test preparation Course</label>
-            <select class="form-control" name="test_preparation_course" placeholder="Enter you Course"
-                required>
-                <option class="placeholder" selected disabled value="">Select Test_course</option>
-                <option value="none">
-                    None
-                </option>
-                <option value="completed">
-                    Completed
-                </option>
-            </select>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Writing Score out of 100</label>
-            <input class="form-control" type="number" name="reading_score"
-                placeholder="Enter your Reading score" min='0' max='100' />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Reading Score out of 100</label>
-            <input class="form-control" type="number" name="writing_score"
-                placeholder="Enter your Reading Score" min='0' max='100' />
-        </div>
-        <div class="mb-3">
-            <input class="btn btn-primary" type="submit" value="Predict your Maths Score" required />
-        </div>
-    </form>
-    <h2>
-       THE  prediction is {{results}}
-    </h2>
-   <body>
+
+    </main>
+
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        <a class="brand footer-brand" href="{{ url_for('index') }}">
+
+            <span class="brand-mark">S<span>.</span></span>
+
+            <span class="brand-name">
+                student<span>insight</span>
+            </span>
+
+        </a>
+
+        <span>
+            Student Performance Indicator · Machine learning project
+        </span>
+
+        <span>
+            Predictions are estimates, not guarantees.
+        </span>
+
+    </footer>
+
+</div>
+
+</body>
 </html>
